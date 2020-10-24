@@ -1,11 +1,5 @@
-# AutoBot
+pip install -U python-dotenv
 
+pip install -U discord.py
 
-get apikey file and rename to .apikey
-
-npm install
-
-// note this installs nodemon globally
-
-sudo npm i -g nodemon 
-nodemon --inspect index.js
+python3 bot.py
