@@ -163,11 +163,11 @@ bot = commands.Bot(command_prefix='$')
 
 infractions = {}
 strictness = .1
+filter_label = "toxic"
 
 def is_bad(message):
 	preds = evaluate(message)
-	print("toxic: " + str(preds["toxic"]))
-	return preds["toxic"] > strictness
+	return preds[filter_label] > strictness
 
 @bot.event
 async def on_message(message):
@@ -185,7 +185,6 @@ async def on_message(message):
 			infractions[message.author.name] = 1
 
 		await message.channel.send('This is your {}th warning {}'.format(infractions[message.author.name], message.author.name))
-		return
 
 	await bot.process_commands(message)
 
@@ -206,6 +205,21 @@ async def set_strictness(ctx, arg):
 
 @set_strictness.error
 async def set_strictness_error(ctx, error):
+	await ctx.send("oops")
+	
+@bot.command(pass_context=True)
+@has_permissions(administrator=True)
+async def set_filter(ctx, arg):
+	global filter_label, labels
+	try:
+		if arg in labels:
+			filter_label = arg	
+		await ctx.send("Set filter to " + arg)
+	except:
+		await ctx.send("Not a valid filter label!")
+
+@set_filter.error
+async def set_filter_error(ctx, error):
 	await ctx.send("oops")
 
 bot.run(TOKEN)
