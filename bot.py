@@ -166,6 +166,7 @@ strictness = .1
 
 def is_bad(message):
 	preds = evaluate(message)
+	print("threat: " + str(preds["threat"]))
 	return preds["threat"] > strictness
 
 @bot.event
@@ -195,6 +196,7 @@ async def test(ctx, arg):
 @bot.command(pass_context=True)
 @has_permissions(administrator=True)
 async def set_strictness(ctx, arg):
+	global strictness
 	try:
 		value = float(arg)
 		strictness = value	
