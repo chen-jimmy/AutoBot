@@ -10,6 +10,7 @@ __pycache__/
 node_modules
 .apikey
 apikey
+*.csv
 
 # Distribution / packaging
 .Python

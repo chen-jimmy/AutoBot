@@ -3,5 +3,3 @@ numpy
 pandas
 transformers
 scikit-learn
-discord.py
-python-dotenv
