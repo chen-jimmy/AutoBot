@@ -9,7 +9,7 @@ client = discord.Client()
 
 @client.event
 async def on_message(message):
-    if message.content == 'ping':
-        await message.channel.send('pong')
+	if message.content == 'ping':
+		await message.channel.send('pong')
 
 client.run(TOKEN)
