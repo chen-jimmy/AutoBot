@@ -214,7 +214,9 @@ async def set_filter(ctx, arg):
 	try:
 		if arg in labels:
 			filter_label = arg	
-		await ctx.send("Set filter to " + arg)
+			await ctx.send("Set filter to " + arg)
+		else:
+			await ctx.send("Not a valid filter label!")
 	except:
 		await ctx.send("Not a valid filter label!")
 
