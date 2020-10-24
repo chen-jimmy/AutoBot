@@ -21,14 +21,12 @@ class InputFeatures(object):
         self.segment_ids = segment_ids
         self.label_ids = label_ids
 
-def get_train_examples(train_file):
-    train_df = pd.read_csv(train_file)
-    ids = train_df['id'].values
-    text = train_df['comment_text'].values
-    labels = train_df[train_df.columns[2:]].values
+def input_text(input):
+    ids = "0002bcb3da6cb337"
+    text = input
+    labels = [0,0,0,0,0,0]
     examples = []
-    for i in range(len(train_df)):
-        examples.append(InputExample(ids[i], text[i], labels=labels[i]))
+    examples.append(InputExample(ids, text, labels=labels))
     return examples
 
 def get_features_from_examples(examples, max_seq_len, tokenizer):
@@ -102,21 +100,6 @@ basemodel = BertModel.from_pretrained(pretrained_weights)
 basemodel.to(device)
 print("bert downloaded")
 
-seq_len = 256
-train_file = 'train.csv'
-train_examples = get_train_examples(train_file)
-train_features = get_features_from_examples(train_examples, seq_len, tokenizer)
-train_dataset = get_dataset_from_features(train_features)
-train_val_split = 0.0001
-train_size = int(len(train_dataset)*(1-train_val_split))
-val_size = len(train_dataset) - train_size
-train_dataset, val_dataset = torch.utils.data.random_split(train_dataset, [train_size, val_size])
-batch = 8
-train_sampler = RandomSampler(train_dataset)
-train_dataloader = DataLoader(train_dataset, sampler=train_sampler, batch_size=batch)
-val_sampler = SequentialSampler(val_dataset)
-val_dataloader = DataLoader(val_dataset, sampler=val_sampler, batch_size=batch)
-
 embed_num = seq_len 
 embed_dim = basemodel.config.hidden_size 
 dropout = basemodel.config.hidden_dropout_prob
@@ -134,44 +117,34 @@ def load_model():
 model = load_model()
 model.eval()
 model = model.to(device)
-y_true = []
-y_pred = []
+
 labels = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
 print('evaluating...')
-for step, batch in enumerate(val_dataloader):
-    batch = tuple(t.to(device) for t in batch)
-    val_input_ids, val_input_mask, val_segment_ids, val_label_ids = batch
-    with torch.no_grad():
-        val_inputs,_ = basemodel(val_input_ids, val_segment_ids, val_input_mask)
-        logits = model(val_inputs)
-    y_true.append(val_label_ids)
-    y_pred.append(logits)
-
-y_true = torch.cat(y_true, dim=0).float().cpu().detach().numpy()
-y_pred = torch.cat(y_pred, dim=0).float().cpu().detach().numpy()
-
-fpr = dict()
-tpr = dict()
-roc_auc = dict()
-
-for i,label in enumerate(labels):
-    fpr[label], tpr[label], _ = roc_curve(y_true[:, i], y_pred[:, i])
-    roc_auc[label] = auc(fpr[label], tpr[label])
-
-print('ROC AUC per label:')
-for label in labels:
-    print(label, ': ', roc_auc[label])
 
 def sigmoid(z):
     s = 1.0 / (1.0 + np.exp(-1.0 * z))
     return s
 
-for i in np.random.randint(0, len(y_pred), size=10):
-    string = tokenizer.decode(val_dataset[i][0], skip_special_tokens=True)
-    print('---------------------------------')
-    print('Comment:')
-    print(string)
-    preds = dict(zip(labels, sigmoid(y_pred[i])))
-    print('Prediction:')
+def evaluate(input):
+    seq_len = 256
+    y_pred = []
+    examples = input_text(input)
+    features = get_features_from_examples(examples, seq_len, tokenizer)
+    input_dataset = get_dataset_from_features(features)
+    input_sampler = SequentialSampler(input_dataset)
+    input_dataloader = DataLoader(input_dataset, sampler=input_sampler, batch_size=1)
+
+    for step, batch in enumerate(input_dataloader):
+        batch = tuple(t.to(device) for t in batch)
+        val_input_ids, val_input_mask, val_segment_ids, val_label_ids = batch
+        with torch.no_grad():
+            val_inputs,_ = basemodel(val_input_ids, val_segment_ids, val_input_mask)
+            logits = model(val_inputs)
+        y_pred.append(logits)
+    y_pred = torch.cat(y_pred, dim=0).float().cpu().detach().numpy()
+    text = tokenizer.decode(input_dataset[0][0], skip_special_tokens=True)
+    preds = dict(zip(labels, sigmoid(y_pred[0])))
     for label in preds:
         print(label, ': ', preds[label])
+
+evaluate("test")
