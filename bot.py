@@ -166,7 +166,7 @@ strictness = .1
 
 def is_bad(message):
 	preds = evaluate(message)
-	return preds["threat"] > strictness:
+	return preds["threat"] > strictness
 
 @bot.event
 async def on_message(message):
