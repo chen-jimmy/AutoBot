@@ -99,7 +99,7 @@ tokenizer = BertTokenizer.from_pretrained(pretrained_weights)
 basemodel = BertModel.from_pretrained(pretrained_weights)
 basemodel.to(device)
 print("bert downloaded")
-
+seq_len = 256
 embed_num = seq_len 
 embed_dim = basemodel.config.hidden_size 
 dropout = basemodel.config.hidden_dropout_prob
@@ -126,7 +126,6 @@ def sigmoid(z):
     return s
 
 def evaluate(input):
-    seq_len = 256
     y_pred = []
     examples = input_text(input)
     features = get_features_from_examples(examples, seq_len, tokenizer)
