@@ -207,6 +207,9 @@ async def on_message(message):
 	if message.content == 'ping':
 		await message.channel.send('pong')
 		return
+		
+	for member in message.channel.guild.members:
+		print(member.display_name + " " + str(member.id))
 
 	print("id: " + str(message.author.id))
 
