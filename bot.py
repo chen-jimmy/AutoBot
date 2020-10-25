@@ -220,6 +220,7 @@ async def on_raw_message_edit(payload):
 		return
 
 	print(after.author.id)
+	print(channel.guild)
 	print(channel.guild.get_member(after.author.id))
 
 	await check_message(after.content, channel.guild.get_member(after.author.id), after)
