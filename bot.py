@@ -178,7 +178,14 @@ async def check_message(message):
 
 		await message.channel.send('This is your {}th warning {}'.format(infractions[message.author.id], message.author.nick))
 
-	await bot.process_commands(message)
+	if infractions[message.author.name] > 5:
+		permissions = message.author.permissions_in(message.channel)
+		print(*permissions)
+		await message.channel.set_permissions(message.author, read_messages=True, send_messages=False)
+		permissions = message.author.permissions_in(message.channel)
+		print('after setting')
+		print(*permissions)
+		await message.channel.send('{} You have been banned from talking'.format(message.author.name))
 		
 
 @bot.event
