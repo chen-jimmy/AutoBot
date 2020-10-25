@@ -162,15 +162,17 @@ evaluate("test")
 bot = commands.Bot(command_prefix='$')
 
 infractions = {}
-strictness = .1
+strictness = .23
 filter_label = "toxic"
 
 def is_bad(message):
 	preds = evaluate(message)
 	return preds[filter_label] > strictness
 
-async def check_message(message, user):
+async def check_message(message, user, message_reference = None):
 	if is_bad(message):
+		if message_reference != None:
+			message_reference.delete()
 		if user.id in infractions:
 			infractions[user.id] = infractions[user.id] + 1
 		else:
@@ -195,11 +197,14 @@ async def on_message(message):
 	if message.author.bot:
 		return
 
+	if type(message.channel) is DMChannel:
+		return
+
 	if message.content == 'ping':
 		await message.channel.send('pong')
 		return
 
-	await check_message(message.content, message.author)
+	await check_message(message.content, message.author, message.channel)
 	await bot.process_commands(message)
 
 @bot.event
@@ -207,7 +212,7 @@ async def on_message_edit(before, after):
 	if after.author.bot:
 		return
 
-	await check_message(after.content, after.author)
+	await check_message(after.content, after.author, after.channel)
 
 @bot.event
 async def on_member_join(member):
