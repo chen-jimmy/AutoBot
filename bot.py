@@ -209,7 +209,7 @@ async def on_message(message):
 
 @bot.event
 async def on_raw_message_edit(payload):
-	after = await bot.get_message(payload.message_id)
+	after = await bot.fetch_message(payload.message_id)
 
 	if after.author.bot:
 		return
