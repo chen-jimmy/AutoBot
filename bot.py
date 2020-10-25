@@ -219,7 +219,7 @@ async def on_raw_message_edit(payload):
 	if after.author.bot:
 		return
 
-	await check_message(after.content, channel.get_member(after.author.id), after)
+	await check_message(after.content, channel.guild.get_member(after.author.id), after)
 
 @bot.event
 async def on_member_join(member):
