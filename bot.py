@@ -208,7 +208,7 @@ async def on_message(message):
 	await bot.process_commands(message)
 
 @bot.event
-async def on_message_edit(before, after):
+async def on_raw_message_edit(before, after):
 	if after.author.bot:
 		return
 
