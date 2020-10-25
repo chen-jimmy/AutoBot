@@ -219,6 +219,9 @@ async def on_raw_message_edit(payload):
 	if after.author.bot:
 		return
 
+	print(after.author.id)
+	print(channel.guild.get_member(after.author.id))
+
 	await check_message(after.content, channel.guild.get_member(after.author.id), after)
 
 @bot.event
