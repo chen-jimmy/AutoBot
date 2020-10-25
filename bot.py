@@ -211,6 +211,7 @@ async def on_message(message):
 	for member in message.channel.guild.members:
 		print(member.display_name + " " + str(member.id))
 
+	print(bot.guild_subscriptions)
 	print("id: " + str(message.author.id))
 
 	await check_message(message.content, message.author, message)
