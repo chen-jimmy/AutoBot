@@ -169,24 +169,25 @@ def is_bad(message):
 	preds = evaluate(message)
 	return preds[filter_label] > strictness
 
-async def check_message(message):
+async def check_message(message, user):
 	if is_bad(message):
-		if message.author.id in infractions:
-			infractions[message.author.id] = infractions[message.author.id] + 1
+		if user.id in infractions:
+			infractions[user.id] = infractions[user.id] + 1
 		else:
-			infractions[message.author.id] = 1
-
-		await message.channel.send('This is your {}th warning {}'.format(infractions[message.author.id], message.author.nick))
-
-	if infractions[message.author.name] > 5:
-		permissions = message.author.permissions_in(message.channel)
-		print(*permissions)
-		await message.channel.set_permissions(message.author, read_messages=True, send_messages=False)
-		permissions = message.author.permissions_in(message.channel)
-		print('after setting')
-		print(*permissions)
-		await message.channel.send('{} You have been banned from talking'.format(message.author.name))
+			infractions[user.id] = 1
 		
+		channel = await user.create_dm()
+		await channel.send('This is your {}th warning {}'.format(infractions[user.id], user.name))
+
+		if infractions[user.id] > 5:
+			channel = await user.create_dm()
+			await channel.send('{} has been kicked'.format(user.name))
+			await bot.kick(user)
+
+"""
+async def on_ready():
+	await client.edit_profile(password=None, avatar=pfp)
+"""
 
 @bot.event
 async def on_message(message):
@@ -197,32 +198,31 @@ async def on_message(message):
 		await message.channel.send('pong')
 		return
 
-	await check_message(message.content)
-
+	await check_message(message.content, message.author)
 	await bot.process_commands(message)
 
 @bot.event
 async def on_message_edit(before, after):
-	if message.author.bot:
+	if after.author.bot:
 		return
 
-	await check_message(after.content)
+	await check_message(after.content, after.author)
 
 @bot.event
 async def on_member_join(member):
-	if message.author.bot:
+	if member.bot:
 		return
 
-	await check_message(member.name)
-	await check_message(member.nick)
+	await check_message(member.name, member)
+	await check_message(member.nick, member)
 
 @bot.event
 async def on_member_update(member):
-	if message.author.bot:
+	if member.bot:
 		return
 
-	await check_message(member.name)
-	await check_message(member.nick)
+	await check_message(member.name, member)
+	await check_message(member.nick, member)
 
 @bot.command()
 async def test(ctx, arg):
