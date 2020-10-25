@@ -197,7 +197,7 @@ async def on_message(message):
 	if message.author.bot:
 		return
 
-	if type(message.channel) is DMChannel:
+	if type(message.channel) is discord.DMChannel:
 		return
 
 	if message.content == 'ping':
