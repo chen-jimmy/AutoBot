@@ -169,6 +169,18 @@ def is_bad(message):
 	preds = evaluate(message)
 	return preds[filter_label] > strictness
 
+async def check_message(message):
+	if is_bad(message):
+		if message.author.id in infractions:
+			infractions[message.author.id] = infractions[message.author.id] + 1
+		else:
+			infractions[message.author.id] = 1
+
+		await message.channel.send('This is your {}th warning {}'.format(infractions[message.author.id], message.author.nick))
+
+	await bot.process_commands(message)
+		
+
 @bot.event
 async def on_message(message):
 	if message.author.bot:
@@ -178,15 +190,32 @@ async def on_message(message):
 		await message.channel.send('pong')
 		return
 
-	if is_bad(message.content):
-		if message.author.name in infractions:
-			infractions[message.author.name] = infractions[message.author.name] + 1
-		else:
-			infractions[message.author.name] = 1
-
-		await message.channel.send('This is your {}th warning {}'.format(infractions[message.author.name], message.author.name))
+	await check_message(message.content)
 
 	await bot.process_commands(message)
+
+@bot.event
+async def on_message_edit(before, after):
+	if message.author.bot:
+		return
+
+	await check_message(after.content)
+
+@bot.event
+async def on_member_join(member):
+	if message.author.bot:
+		return
+
+	await check_message(member.name)
+	await check_message(member.nick)
+
+@bot.event
+async def on_member_update(member):
+	if message.author.bot:
+		return
+
+	await check_message(member.name)
+	await check_message(member.nick)
 
 @bot.command()
 async def test(ctx, arg):
