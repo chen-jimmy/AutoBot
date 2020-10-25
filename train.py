@@ -99,7 +99,7 @@ tokenizer = BertTokenizer.from_pretrained(pretrained_weights)
 basemodel = BertModel.from_pretrained(pretrained_weights)
 basemodel.to(device)
 print("downloaded bert")
-seq_len = 1024
+seq_len = 256
 train_file = 'train.csv'
 train_examples = get_train_examples(train_file)
 train_features = get_features_from_examples(train_examples, seq_len, tokenizer)
@@ -111,7 +111,7 @@ train_size = int(len(train_dataset)*(1-train_val_split))
 val_size = len(train_dataset) - train_size
 train_dataset, val_dataset = torch.utils.data.random_split(train_dataset, [train_size, val_size])
 
-batch = 256
+batch = 8
 train_sampler = RandomSampler(train_dataset)
 train_dataloader = DataLoader(train_dataset, sampler=train_sampler, batch_size=batch)
 val_sampler = SequentialSampler(val_dataset)
