@@ -172,7 +172,7 @@ def is_bad(message):
 async def check_message(message, user, message_reference = None):
 	if is_bad(message):
 		if message_reference != None:
-			message_reference.delete()
+			await message_reference.delete()
 		if user.id in infractions:
 			infractions[user.id] = infractions[user.id] + 1
 		else:
