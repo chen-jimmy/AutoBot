@@ -204,7 +204,7 @@ async def on_message(message):
 		await message.channel.send('pong')
 		return
 
-	await check_message(message.content, message.author, message.channel)
+	await check_message(message.content, message.author, message)
 	await bot.process_commands(message)
 
 @bot.event
@@ -212,7 +212,7 @@ async def on_message_edit(before, after):
 	if after.author.bot:
 		return
 
-	await check_message(after.content, after.author, after.channel)
+	await check_message(after.content, after.author, after)
 
 @bot.event
 async def on_member_join(member):
