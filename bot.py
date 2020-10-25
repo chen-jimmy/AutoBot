@@ -208,6 +208,8 @@ async def on_message(message):
 		await message.channel.send('pong')
 		return
 
+	print("id: " + str(message.author.id))
+
 	await check_message(message.content, message.author, message)
 	await bot.process_commands(message)
 
@@ -222,6 +224,9 @@ async def on_raw_message_edit(payload):
 	print(after.author.id)
 	print(channel.guild)
 	print(channel.guild.get_member(after.author.id))
+
+	for member in channel.guild.members:
+		print(member.display_name + " " + str(member.id))
 
 	await check_message(after.content, channel.guild.get_member(after.author.id), after)
 
