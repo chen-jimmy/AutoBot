@@ -158,7 +158,6 @@ def evaluate(input):
 
 evaluate("test")
 
-#client = discord.Client()
 bot = commands.Bot(command_prefix='$')
 
 infractions = {}
@@ -170,9 +169,6 @@ def is_bad(message):
 	return preds[filter_label] > strictness
 
 async def check_message(message, user, message_reference = None):
-
-	
-
 	message.replace('.com', '').replace('https://', '').replace('http://', '')
 	if is_bad(message):
 		if message_reference != None:
