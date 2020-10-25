@@ -170,6 +170,10 @@ def is_bad(message):
 	return preds[filter_label] > strictness
 
 async def check_message(message, user, message_reference = None):
+
+	
+
+	message.replace('.com', '').replace('https://', '').replace('http://', '')
 	if is_bad(message):
 		if message_reference != None:
 			await message_reference.delete()
@@ -215,7 +219,7 @@ async def on_raw_message_edit(payload):
 	if after.author.bot:
 		return
 
-	await check_message(after.content, after.author, after)
+	await check_message(after.content, channel.get_member(after.author.id), after)
 
 @bot.event
 async def on_member_join(member):
