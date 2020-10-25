@@ -92,31 +92,31 @@ class KimCNN(nn.Module):
             return loss
         else:
             return logits
-
+print("downloading bert")
 device = torch.device(type='cuda')
 pretrained_weights = 'bert-base-cased'
 tokenizer = BertTokenizer.from_pretrained(pretrained_weights)
 basemodel = BertModel.from_pretrained(pretrained_weights)
 basemodel.to(device)
-
-seq_len = 512
+print("downloaded bert")
+seq_len = 1024
 train_file = 'train.csv'
 train_examples = get_train_examples(train_file)
 train_features = get_features_from_examples(train_examples, seq_len, tokenizer)
 train_dataset = get_dataset_from_features(train_features)
 
 
-train_val_split = 0.0001
+train_val_split = 0.1
 train_size = int(len(train_dataset)*(1-train_val_split))
 val_size = len(train_dataset) - train_size
 train_dataset, val_dataset = torch.utils.data.random_split(train_dataset, [train_size, val_size])
 
-batch = 16
+batch = 256
 train_sampler = RandomSampler(train_dataset)
 train_dataloader = DataLoader(train_dataset, sampler=train_sampler, batch_size=batch)
 val_sampler = SequentialSampler(val_dataset)
 val_dataloader = DataLoader(val_dataset, sampler=val_sampler, batch_size=batch)
-
+print("dataloader done")
 embed_num = seq_len 
 embed_dim = basemodel.config.hidden_size 
 dropout = basemodel.config.hidden_dropout_prob
@@ -137,6 +137,7 @@ epochs = 10
 optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 labels = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
 
+max_accuracy = 0.0
 for i in range(epochs):
     print('-----------EPOCH #{}-----------'.format(i+1))
     print('training...')
@@ -177,9 +178,15 @@ for i in range(epochs):
     for i,label in enumerate(labels):
         fpr[label], tpr[label], _ = roc_curve(y_true[:, i], y_pred[:, i])
         roc_auc[label] = auc(fpr[label], tpr[label])
-
+    
+    average_accuracy = 0.0
     print('ROC AUC per label:')
     for label in labels:
+        average_accuracy += roc_auc[label]
         print(label, ': ', roc_auc[label])
+    average_accuracy = average_accuracy/6
+    print("Average: ", average_accuracy)
 
-save_model(model)
+    if average_accuracy >= max_accuracy:
+        max_accuracy = average_accuracy
+        save_model(model)
