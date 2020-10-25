@@ -181,6 +181,7 @@ async def check_message(message, user):
 
 		if infractions[user.id] > 5:
 			channel = await user.create_dm()
+			infractions[user.id] = 0
 			await channel.send('{} has been kicked'.format(user.name))
 			await user.kick()
 
